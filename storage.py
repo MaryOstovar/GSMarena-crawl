@@ -1,6 +1,8 @@
 import json
 from abc import ABC, abstractmethod
 
+from mongo import MongoDB
+
 
 class StorageBase(ABC):
     @abstractmethod
@@ -9,8 +11,19 @@ class StorageBase(ABC):
 
 
 class MongoStorage(StorageBase):
-    def store(self, *args, **kwargs):
-        pass
+    def __init__(self):
+        self.mongo = MongoDB()
+
+    def store(self, data, collection, *args, **kwargs):
+        collection = getattr(self.mongo.database, collection)
+        if isinstance(data, list) and len(data) > 1:
+            collection.insert_many(data)
+        else:
+            collection.insert_one(data)
+
+
+
+
 
 
 class FileStorage(StorageBase):

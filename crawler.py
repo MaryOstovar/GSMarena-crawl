@@ -3,18 +3,24 @@ from bs4 import BeautifulSoup
 from abc import ABC, abstractmethod
 
 from config import BASE_LINK, storage_type, api
+from storage import FileStorage, MongoStorage
 
 
 class CrawlerBase(ABC):
     def __init__(self):
-        self.storage = storage_type
+        self.storage = self.choose_storage()
+    @staticmethod
+    def choose_storage():
+        if storage_type == "file":
+            return FileStorage()
+        return MongoStorage()
 
     @abstractmethod
     def start(self, *args, **kwargs):
         pass
 
     @staticmethod
-    def request(url):  # request & make object of Beautiful-soup
+    def get(url):  # request & make object of Beautiful-soup
 
         try:
             response = api.get(url)
@@ -35,24 +41,27 @@ class CrawlerLinks(CrawlerBase):
         for links in companies_link:
             url = f"https://www.gsmarena.com/{links}"
             mobile_link = self.get_each_link_mobile(url)
-            self.storage.store(mobile_link, links)
+            self.storage.store(mobile_link, 'mobile_links')
 
     def get_maker_link(self, link):  # from source get each company relative url
         find_maker_link = []
-        source = self.request(link)
+        source = self.get(link)
 
-        find_div = source.find('div', {'class': 'st-text'})
-        find_all_tag_a = find_div.findAll('a')
+        find_div = source.find('div', {'class': 'brandmenu-v2'})
+        print(find_div)
+        find_tag_ul = find_div.find('ul')
+        find_all_tag_a = find_tag_ul.find_all('a')
 
-        for tr in find_all_tag_a:
-            find_maker_link.append(tr.get('href'))
+        for tag_a in find_all_tag_a:
+            find_maker_link.append(tag_a.get('href'))
+
 
         return find_maker_link
 
     # get each mobile link and save in separate file for each brand
     def get_each_link_mobile(self, url):
         find_link_mobile = []
-        source = self.request(url)
+        source = self.get(url)
 
         find_div = source.find('div', {'class': 'makers'})
         find_link_maker = find_div.findAll('a')
