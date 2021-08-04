@@ -77,3 +77,21 @@ class CrawlerLinks(CrawlerBase):
         for tr in find_link_maker:
             find_link_mobile.append(tr.get('href'))
         return find_link_mobile
+
+
+class DataCrawler(CrawlerBase):
+    def __init__(self):
+        super().__init__()
+        self.links = self.__load_link()
+        self.maker_link = CrawlerLinks()
+
+    def __load_link(self):
+        links = []
+        for reletive_url in self.maker_link.get_maker_link(BASE_LINK):
+            links.extend(self.storage.load(reletive_url))
+
+        return links
+
+    def start(self):
+        for li in self.links:
+            pass
