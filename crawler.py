@@ -9,6 +9,7 @@ from storage import FileStorage, MongoStorage
 class CrawlerBase(ABC):
     def __init__(self):
         self.storage = self.choose_storage()
+
     @staticmethod
     def choose_storage():
         if storage_type == "file":
@@ -17,6 +18,10 @@ class CrawlerBase(ABC):
 
     @abstractmethod
     def start(self, *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def store(self, *args, **kwargs):
         pass
 
     @staticmethod
@@ -36,12 +41,16 @@ class CrawlerLinks(CrawlerBase):
         super().__init__()
         self.base_link = link
 
-    def start(self):
+    def start(self, store=False):
         companies_link = self.get_maker_link(self.base_link)
         for links in companies_link:
             url = f"https://www.gsmarena.com/{links}"
             mobile_link = self.get_each_link_mobile(url)
-            self.storage.store(mobile_link, 'mobile_links')
+            if store:
+                self.store([{'url': li, 'flag': False} for li in mobile_link])
+
+    def store(self, data, *args):
+        self.storage.store(data, 'mobile_links')
 
     def get_maker_link(self, link):  # from source get each company relative url
         find_maker_link = []
@@ -54,7 +63,6 @@ class CrawlerLinks(CrawlerBase):
 
         for tag_a in find_all_tag_a:
             find_maker_link.append(tag_a.get('href'))
-
 
         return find_maker_link
 
