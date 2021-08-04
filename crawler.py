@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 from config import BASE_LINK, storage_type, api
 from storage import FileStorage, MongoStorage
-
+from parser import SpecificationParser
 
 class CrawlerBase(ABC):
     def __init__(self):
@@ -84,6 +84,7 @@ class DataCrawler(CrawlerBase):
         super().__init__()
         self.links = self.__load_link()
         self.maker_link = CrawlerLinks()
+        self.parser = SpecificationParser()
 
     def __load_link(self):
         links = []
@@ -94,4 +95,8 @@ class DataCrawler(CrawlerBase):
 
     def start(self):
         for li in self.links:
-            pass
+            responce = self.get(BASE_LINK + li)
+            data = self.parser.parse(responce)
+
+
+
