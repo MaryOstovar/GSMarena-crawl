@@ -6,6 +6,7 @@ from config import BASE_LINK, storage_type, api
 from storage import FileStorage, MongoStorage
 from parser import SpecificationParser
 
+
 class CrawlerBase(ABC):
     def __init__(self):
         self.storage = self.choose_storage()
@@ -82,21 +83,27 @@ class CrawlerLinks(CrawlerBase):
 class DataCrawler(CrawlerBase):
     def __init__(self):
         super().__init__()
+        self.link_crawler = CrawlerLinks()
         self.links = self.__load_link()
-        self.maker_link = CrawlerLinks()
         self.parser = SpecificationParser()
 
     def __load_link(self):
         links = []
-        for reletive_url in self.maker_link.get_maker_link(BASE_LINK):
+        for reletive_url in self.link_crawler.get_maker_link(BASE_LINK):
             links.extend(self.storage.load(reletive_url))
 
         return links
 
-    def start(self):
+    def start(self, store=False):
         for li in self.links:
-            responce = self.get(BASE_LINK + li)
-            data = self.parser.parse(responce)
+            response = self.get(BASE_LINK + li)
+            data = self.parser.parse(response)
+            if store:
+                self.store(data, li)
+
+    def store(self, data, filename):
+        self.storage.store(data, filename)
+
 
 
 

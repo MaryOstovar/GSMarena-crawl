@@ -19,7 +19,8 @@ class SpecificationParser:
 
         for table in find_table:
 
-            table_name = table.find('th', {'scope': 'row'}).text
+            table_name = getattr(table.find('th', {'scope': 'row'}), 'text', None)
+
             for tr in table.find_all('tr'):
                 td_ttl = getattr(tr.find('td', {'class': 'ttl'}), 'text', None)
 

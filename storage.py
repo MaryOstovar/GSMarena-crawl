@@ -31,7 +31,7 @@ class MongoStorage(StorageBase):
 
 class FileStorage(StorageBase):
     def store(self, data, filename):
-        with open(f'link/{filename}.json', 'w') as s:
+        with open(f'link/data/{filename}.json', 'w') as s:
             s.write(json.dumps(data))
 
     def load(self,filename, *args, **kwargs):
