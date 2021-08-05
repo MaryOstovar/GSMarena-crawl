@@ -89,20 +89,22 @@ class DataCrawler(CrawlerBase):
 
     def __load_link(self):
         links = []
-        for reletive_url in self.link_crawler.get_maker_link(BASE_LINK):
-            links.extend(self.storage.load(reletive_url))
+
+        links.extend(self.storage.load('mobile_links', {'flag': False}))
 
         return links
 
     def start(self, store=False):
         for li in self.links:
-            response = self.get(BASE_LINK + li)
+            response = self.get(BASE_LINK + li.get('url'))
             data = self.parser.parse(response)
             if store:
-                self.store(data, li)
+                self.store(data, 'data_each_mobile')
+            self.storage.update_flag(li)
 
     def store(self, data, filename):
         self.storage.store(data, filename)
+
 
 
 

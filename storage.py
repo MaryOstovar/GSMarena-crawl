@@ -25,8 +25,21 @@ class MongoStorage(StorageBase):
         else:
             collection.insert_one(data)
 
-    def load(self, *args, **kwargs):
-        pass
+    def load(self, collection_name, filter_data):
+        collection = self.mongo.database[collection_name]
+        if filter_data is not None:
+            data = collection.find(filter_data)
+        else:
+            data = collection.find()
+        return data
+
+    def update_flag(self, link):
+        self.mongo.database.mobile_links.find_one_and_update(
+            {'_id': link['_id']},
+            {'$set': {'flag': True}}
+
+        )
+
 
 
 class FileStorage(StorageBase):
